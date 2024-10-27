@@ -15,7 +15,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+    
+       $schedule->command('articles:fetch')->everyTenMinutes()->runInBackground()->withoutOverlapping()()
+         ->before(function () {
+             \Log::info('Fetch Articles command is about to run');
+         })
+         ->after(function () {
+             \Log::info('Fetch Articles command has finished running');
+         });
     }
 
     /**
