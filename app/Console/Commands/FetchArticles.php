@@ -1,7 +1,5 @@
 <?php
 
-// app/Console/Commands/FetchArticles.php
-
 namespace App\Console\Commands;
 
 use App\Models\Article;
@@ -9,6 +7,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\NewsAPICollectorJob;
 use App\Jobs\GuardianNewsAPICollectorJob;
+use App\Jobs\NytNewsCollectorJob;
+
 
 class FetchArticles extends Command
 {
@@ -19,6 +19,7 @@ class FetchArticles extends Command
     {
         NewsAPICollectorJob::dispatch();
         GuardianNewsAPICollectorJob::dispatch();
+        NytNewsCollectorJob::dispatch();
         $this->info('Articles fetched and stored successfully.');
     }
 }

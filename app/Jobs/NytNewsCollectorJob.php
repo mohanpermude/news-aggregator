@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use App\Models\Article;
 
-class GuardianNewsAPICollectorJob implements ShouldQueue
+class NytNewsCollectorJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -33,8 +33,8 @@ class GuardianNewsAPICollectorJob implements ShouldQueue
      */
     public function __construct()
     {
-        $this->apiKey = env('GDN_API_KEY');
-        $this->apiUrl = env('GDN_API_URL');
+        $this->apiKey = env('NYT_API_KEY');
+        $this->apiUrl = env('NYT_API_URL');
     }
 
     /**
@@ -53,10 +53,11 @@ class GuardianNewsAPICollectorJob implements ShouldQueue
     private function callRequest(): mixed
     {
         $today = today()->format('Y-m-d');
-        $url = $this->apiUrl.'/search?from-date='. $today.'&show-fields=byline,publication,body&api-key='.$this->apiKey;
+        $url = $this->apiUrl.'/svc/topstories/v2/home.json?api-key='. $this->apiKey;
         $response = Http::get($url);
+    
         $articles = $response->json() ?? [];
-        $resApi = $articles['response']['results'] ?? $articles;
+        $resApi = $articles['results'] ?? $articles;
 
         return $resApi;
     }
@@ -69,21 +70,19 @@ class GuardianNewsAPICollectorJob implements ShouldQueue
     {
         foreach ($articles as $articleData) {
 
-            $publishedAt = \Carbon\Carbon::parse($articleData['webPublicationDate'])->format('Y-m-d H:i:s');
+            $publishedAt = \Carbon\Carbon::parse($articleData['published_date'])->format('Y-m-d H:i:s');
            
             try {
                 Article::updateOrCreate(
-                    ['title' => $articleData['webTitle']], 
+                    ['title' => $articleData['title']], 
                     [
-                        'content' => isset($articleData['fields']['body']) ? 
-                                        strip_tags($articleData['fields']['body']) : 'No content available',
-                        'category' => $articleData['sectionId'] ?? 'general',
-                        'source' =>  $articleData['fields']['publication'] ?? "",
-                        'author' =>  $articleData['fields']['byline'] ?? "",
+                        'content' => $articleData['abstract'] ?? 'No content available',
+                        'category' => $articleData['section'] ?? 'general',
+                        'source' => "The New York Times",
+                        'author' =>  $articleData['byline'] ?? "",
                         'published_at' => $publishedAt,
                     ]
                 );
-
             } catch (\Exception $e) {
 
                 continue;
