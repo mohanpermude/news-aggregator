@@ -20,23 +20,25 @@ class NewsAPICollectorJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var int
+   /**
+     * @var string
      */
-    protected int $page;
+    protected ?string $apiKey;
+
     /**
-     * @var int
+     * @var string
      */
-    protected int $limit;
+    protected ?string $apiUrl;
 
     /**
      * Create a new job instance.
      *
      */
-    public function __construct(int $limit = 100)
+    public function __construct()
     {
         $this->onQueue(QueueType::HIGH);
-        $this->limit = $limit;
+        $this->apiKey = env('NWS_API_KEY');
+        $this->apiUrl = env('NWS_API_URL');
     }
 
     /**
@@ -57,7 +59,7 @@ class NewsAPICollectorJob implements ShouldQueue
     private function callRequest(): mixed
     {
         $today = today()->format('Y-m-d');
-        $url = 'https://newsapi.org/v2/everything?q=tesla&from='.$today.'7&sortBy=publishedAt&apiKey=ca3633aaf9ad4778b784e5b408eed74c';
+        $url = $this->apiUrl.'/v2/everything?q=tesla&from='.$today.'&sortBy=publishedAt&apiKey='.$this->apiKey;
         $response = Http::get($url);
         $articles = $response->json()['articles'] ?? [];
         $resApi['articles'] = $articles;
@@ -72,6 +74,7 @@ class NewsAPICollectorJob implements ShouldQueue
     private function saveNews($articles): void
     {
         foreach ($articles as $articleData) {
+            dd($articleData);
 
             $publishedAt = \Carbon\Carbon::parse($articleData['publishedAt'])->format('Y-m-d H:i:s');
             $maxWords = 30; // Specify your desired word limit
