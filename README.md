@@ -25,12 +25,15 @@ preferences. Utilizing a RESTful API, it allows users to receive news updates ta
         $ docker ps
         $ docker exec -it <contaner-id> bash
 
+Run below commands inside docker container
+
 ## Install
 
         $ composer install
+        $ cp .env.example .env
         $ php artisan migrate
         $ php artisan db:seed
-        $ php artisan serve
+        $ php artisan key:generate
 
 for run schedule:
 
