@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('preferences')->group(function () {
         Route::post('/', [UserPreferenceController::class, 'store']);
         Route::get('/', [UserPreferenceController::class, 'show']);
-        Route::get('/personalized-feed', [UserPreferenceController::class, 'personalizedFeed']);
     });
+    
+    Route::get('/personalized-feed', [UserPreferenceController::class, 'personalizedFeed']);
 });

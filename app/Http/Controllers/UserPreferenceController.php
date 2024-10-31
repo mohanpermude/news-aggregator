@@ -13,11 +13,38 @@ use App\Models\Article;
 class UserPreferenceController extends Controller
 {
     // Set user preferences
+    /**
+     * @OA\Post(
+     *     path="/api/preferences",
+     *     tags={"User Preferences"},
+     *     summary="Set user preferences",
+     *     description="Allows the authenticated user to set their preferred news sources, categories, and authors.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="preferred_sources", type="array", @OA\Items(type="string"), description="Array of preferred news sources"),
+     *             @OA\Property(property="preferred_categories", type="array", @OA\Items(type="string"), description="Array of preferred news categories"),
+     *             @OA\Property(property="preferred_authors", type="array", @OA\Items(type="string"), description="Array of preferred authors")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User preferences updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/UserPreference")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
         $validator = Validator::make($request->all(), [
             'preferred_sources' => 'nullable|array',
             'preferred_categories' => 'nullable|array',
@@ -41,21 +68,55 @@ class UserPreferenceController extends Controller
     }
 
     // Get user preferences
+    /**
+     * @OA\Get(
+     *     path="/api/preferences",
+     *     tags={"User Preferences"},
+     *     summary="Get user preferences",
+     *     description="Fetches the authenticated user's news preferences, including preferred sources, categories, and authors.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User preferences retrieved successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/UserPreference")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function show()
     {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
         $preferences = UserPreference::where('user_id', Auth::id())->first();
         return response()->json($preferences);
     }
 
     // Fetch personalized news feed
+    /**
+     * @OA\Get(
+     *     path="/api/personalized-feed",
+     *     tags={"User Preferences"},
+     *     summary="Fetch personalized news feed",
+     *     description="Returns a paginated list of articles based on the user's preferences.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Personalized news feed fetched successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Article")),
+     *             @OA\Property(property="links", type="object", description="Pagination links"),
+     *             @OA\Property(property="meta", type="object", description="Pagination metadata")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function personalizedFeed()
     {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
         $preferences = UserPreference::where('user_id', Auth::id())->first();
     
         $query = Article::query();
@@ -75,6 +136,7 @@ class UserPreferenceController extends Controller
         }
     
         $articles = $query->paginate(10);
+
         return response()->json($articles);
     }
 }

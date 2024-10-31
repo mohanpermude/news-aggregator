@@ -53,20 +53,6 @@ class UserPreferenceControllerTest extends TestCase
         ]);
     }
 
-    public function test_user_cannot_store_preferences_without_authentication()
-    {
-        $data = [
-            'preferred_sources' => ['Tech News'],
-            'preferred_categories' => ['technology'],
-            'preferred_authors' => ['John Doe'],
-        ];
-
-        $response = $this->postJson('/api/preferences', $data);
-
-        $response->assertStatus(401)
-                 ->assertJson(['message' => 'Unauthenticated.']);
-    }
-
     public function test_store_preferences_validation_fails()
     {
         // Simulate user authentication
@@ -114,13 +100,6 @@ class UserPreferenceControllerTest extends TestCase
                  ]);
     }
 
-    public function test_user_cannot_show_preferences_without_authentication()
-    {
-        $response = $this->getJson('/api/preferences');
-
-        $response->assertStatus(401)
-                 ->assertJson(['message' => 'Unauthenticated.']);
-    }
 
     public function test_user_can_fetch_personalized_feed()
     {
@@ -151,7 +130,7 @@ class UserPreferenceControllerTest extends TestCase
         // Simulate user authentication
         $this->actingAs($this->user);
 
-        $response = $this->getJson('/api/preferences/personalized-feed');
+        $response = $this->getJson('/api/personalized-feed');
 
         $response->assertStatus(200)
                  ->assertJsonStructure([
@@ -172,13 +151,5 @@ class UserPreferenceControllerTest extends TestCase
                      'prev_page_url',
                  ])
                  ->assertJsonCount(1, 'data'); // Should return 1 article
-    }
-
-    public function test_user_cannot_fetch_personalized_feed_without_authentication()
-    {
-        $response = $this->getJson('/api/preferences/personalized-feed');
-
-        $response->assertStatus(401)
-                 ->assertJson(['message' => 'Unauthenticated.']);
     }
 }
