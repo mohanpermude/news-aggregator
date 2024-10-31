@@ -5,8 +5,6 @@
 News-Aggregator is a Laravel-based application designed to fetch news from various sources and filter them based on user
 preferences. Utilizing a RESTful API, it allows users to receive news updates tailored to their interests.
 
-I assumed this project would be a large scale project, so I try to implement robust and engineering structure.
-
 - Database: mySql
 - PHP : 8.0
 - Laravel : 9.19
@@ -23,7 +21,7 @@ I assumed this project would be a large scale project, so I try to implement rob
 - Swagger documentation `http://127.0.0.1:1000/api/documentation`
 
 ## Docker
-        $ docker-cmpose up -d
+        $ docker-compose up -d
         $ docker ps
         $ docker exec -it <contaner-id> bash
 
@@ -31,7 +29,7 @@ I assumed this project would be a large scale project, so I try to implement rob
 
         $ composer install
         $ php artisan migrate
-        $ php artisan db:seed --class=dataSourceSeeder
+        $ php artisan db:seed
         $ php artisan serve
 
 for run schedule:
